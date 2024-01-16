@@ -1,3 +1,5 @@
+const people = require("../object")
+
 function post(){
     fetch('/post', {
         method: 'POST',
@@ -5,9 +7,25 @@ function post(){
             'Content-Type':'application/json'
         },
         body:JSON.stringify(
-            
         )
     })
+    let salida=''
+    people.forEach((person) => {
+        salida +=`
+        <tr>
+            <td>${person.name}</td>
+            <td>${person.lastName}</td>
+            <td>${person.age}</td>
+        </tr>
+        `
+    })
+    return `<table>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellidos</th>
+            <th>Edad</th>
+        </tr>
+    </table>`
 }
 
 function put(){
