@@ -3,13 +3,17 @@ const persons = require('./object')
 const app = express();
 
 app.use(express.static('public'))
+app.use(express.urlencoded({extended: false}))
+app.use(express.json())
 
 app.get('/personas', function (request, response) {
     response.send(persons);
 });
 
-app.post('/post', function (request, response) {
-    response.send(persons);
+app.post('/sumar', function (request, response) {
+    const {name, lastName, age} = request.body
+    persons.push({name, lastName, age})
+    response.send(persons)
 });
 
 app.put('/put', function (request, response) {

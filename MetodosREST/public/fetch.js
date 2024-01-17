@@ -1,53 +1,9 @@
-const people = require("../object")
 
-function post(){
-    fetch('/post', {
-        method: 'POST',
-        headers: {
-            'Content-Type':'application/json'
-        },
-        body:JSON.stringify(
-        )
+    fetch('/personas').then((res)=>res.json()).then((data) => {
+        const li = document.getElementById('listpersons')
+        data.forEach(person => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${person.name} ${person.lastName}, Edad: ${person.age}`;
+            li.appendChild(listItem);
+        });
     })
-    let salida=''
-    people.forEach((person) => {
-        salida +=`
-        <tr>
-            <td>${person.name}</td>
-            <td>${person.lastName}</td>
-            <td>${person.age}</td>
-        </tr>
-        `
-    })
-    return `<table>
-        <tr>
-            <th>Nombre</th>
-            <th>Apellidos</th>
-            <th>Edad</th>
-        </tr>
-    </table>`
-}
-
-function put(){
-    fetch('/put', {
-        method: 'PUT',
-        headers: {
-            'Content-Type':'application/json'
-        },
-        body:JSON.stringify(
-            
-        )
-    })
-}
-
-function drop(){
-    fetch('drop/', {
-        method: 'DROP',
-        headers: {
-            'Content-Type':'application/json'
-        },
-        body:JSON.stringify(
-            
-        )
-    })
-}
