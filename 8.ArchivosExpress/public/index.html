@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>File Upload</h1>
+    <form action="/subir" method="POST" enctype="multipart/form-data">`
+        <input type="file" name="file" required>
+        <button type="submit">Subir</button>
+    </form>
+
+    <div id="gallery"></div>
+    <script>
+        fetch('/imagenes')
+            .then(response => response.json())
+            .then(data => {
+                let salida = ""
+                data.forEach(filename => {
+                    const imagePath = `http://localhost:3000/fotos/${filename}`;
+                    salida +=
+                        `<div class="gallery-item">
+                        <img src="${imagePath}" style="width:200px">
+                        <button onclick="descargarArchivo('${filename}')">Descargar</button>
+                        </div>`
+                });
+                document.getElementById('gallery').innerHTML = salida
+            })
+            .catch(error => console.error('Error en la petición de imágenes', error))
+
+        function descargarArchivo(filename) {
+            window.open(`/descarga?file=${filename}`, '_blank');
+        }
+    </script>
+</body>
+
+</html>
