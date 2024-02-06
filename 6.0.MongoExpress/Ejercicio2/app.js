@@ -3,16 +3,15 @@ const { MongoClient } = require('mongodb');
 
 const app = express();
 
-app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
+app.use(express.json());
 app.use(express.static('public'))
 
-const uri = 'mongodb://localhost:27017';
-const client = new MongoClient(uri);
+const client = new MongoClient('mongodb://127.0.0.1:27017');
 
 async function conectarDB() {
     try {
-        await client.connect().then((client) => app.locals.db = client.db('prueba'));
+        await client.connect().then((client) => app.locals.db = client.db('ejercicios'));
         await client.db("admin").command({ ping: 1 });
         console.log("🟢 MongoDB está conectado");
     } catch (error) {
@@ -41,32 +40,33 @@ app.get('/api/libros/:titulo', async (req, res) => {
 });
 
 
-app.post('/api/nuevoLibro/:libro', async (req, res) => {
+app.post('/api/nuevoLibro/:titulo', async(req, res)=>{
     try {
-        const results = await app.locals.db.collection('libros').insertOne({ titulo: req.params.titulo , leido: false})
-        res.send({ mensaje: "Documento insertado: " + results.insertedId, results })
+        const results = await app.locals.db.collection('libros').insertOne({titulo: req.params.titulo, leido: false})
+        res.send({mensaje: "Libro insertado", results})
     } catch (error) {
-        console.error(error);
-        res.status(500).send({ mensaje: 'Error al hacer la inserción', error });
+        res.send({mensaje: 'Libro no insertado', error})
     }
 })
 
-app.put('/api/modificar/:color', async (req, res) => {
+app.put('/api/editarLibro/:libro', async (req, res) => {
     try {
-        const results = await app.locals.db.collection('libros').updateOne({ titulo: req.params.titulo , leido: false})
-        res.send({mensaje: "Documento(s) actualizado(s)", results})
+        const results = await app.locals.db.collection('libros').updateOne({ titulo: req.params.titulo}, {$set: {leido: true}})
+        res.send({mensaje: "Libro modificado", results})
     } catch (error) {
-        console.error(error);
-        res.status(500).send({ mensaje: 'Error al modificar el documento', error });
+        res.status(500).send({ mensaje: 'Libro no modificado', error });
     }
 })
 
-app.delete('/api/borrar/:patas', async (req, res) => {
+
+app.delete('/api/borrarLibro/:titulo', async (req,res)=>{
     try {
-        const results = await app.locals.db.collection('mesas').deleteMany({patas: parseInt(req.params.patas)})
-        res.send({mensaje: "Documento(s) borrado(s)", results})
+        const results = await app.locals.db.collection('libros').deleteOne({ titulo: req.params.titulo })
+        results.deletedCount < 1
+        ? res.send({ mensaje: "Libro no borrado", results})
+        : res.send({ mensaje: "Libro borrado", results })
     } catch (error) {
-        res.send({mensaje: "Borrado fallido", error})
+        res.send({ mensaje: 'Libro no borrado', error })
     }
 })
 
