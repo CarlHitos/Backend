@@ -5,6 +5,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
+app.use(express.static('public'))
 
 const uri = 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
@@ -23,18 +24,26 @@ conectarDB();
 
 app.get('/api/libros', async (req, res) => {
     try {
-        const db = app.locals.db;
-        const libros = await db.collection('libros').find().toArray();
+        const results = await app.locals.db.collection('libros').find().toArray();
         res.status(200).send({mensaje: "Petición correcta", results})
     } catch (error) {
         res.status(500).send({mensaje: "Petición no satisfecha", error})
     }
 });
 
-app.post('/api/anyadir', async (req, res) => {
+app.get('/api/libros/:titulo', async (req, res) => {
     try {
-        let { tamano, color, material, patas  } = req.body
-        const results = await app.locals.db.collection('mesas').insertOne({ tamano, color, material, patas })
+        const results = await app.locals.db.collection('libros').find({titulo: req.params.titulo}).toArray();
+        res.status(200).send({mensaje: "Petición correcta", results})
+    } catch (error) {
+        res.status(500).send({mensaje: "Petición no satisfecha", error})
+    }
+});
+
+
+app.post('/api/nuevoLibro/:libro', async (req, res) => {
+    try {
+        const results = await app.locals.db.collection('libros').insertOne({ titulo: req.params.titulo , leido: false})
         res.send({ mensaje: "Documento insertado: " + results.insertedId, results })
     } catch (error) {
         console.error(error);
@@ -44,7 +53,7 @@ app.post('/api/anyadir', async (req, res) => {
 
 app.put('/api/modificar/:color', async (req, res) => {
     try {
-        const results = await app.locals.db.collection('mesas').updateMany({color: req.params.color}, {$set: {color: "Roja"}})
+        const results = await app.locals.db.collection('libros').updateOne({ titulo: req.params.titulo , leido: false})
         res.send({mensaje: "Documento(s) actualizado(s)", results})
     } catch (error) {
         console.error(error);
