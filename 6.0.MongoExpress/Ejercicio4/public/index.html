@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operaciones CRUD de Menú</title>
+</head>
+
+<body>
+    <h1>Operaciones CRUD de Menú</h1>
+
+    <h2>Añadir/Editar Menú</h2>
+    <form id="formularioMenu">
+        <label for="numeroMenu">Número de Menú:</label>
+        <input type="text" id="numeroMenu" name="numeroMenu"><br><br>
+        <label for="primerPlato">Primer Plato:</label>
+        <input type="text" id="primerPlato" name="primerPlato"><br><br>
+        <label for="segundoPlato">Segundo Plato:</label>
+        <input type="text" id="segundoPlato" name="segundoPlato"><br><br>
+        <label for="postre">Postre:</label>
+        <input type="text" id="postre" name="postre"><br><br>
+        <label for="precio">Precio:</label>
+        <input type="text" id="precio" name="precio"><br><br>
+        <button type="submit">Añadir/Editar Menú</button>
+    </form>
+
+    <h2>Menús</h2>
+    <table id="tablaMenus">
+        <thead>
+            <tr>
+                <th>Número de Menú</th>
+                <th>Primer Plato</th>
+                <th>Segundo Plato</th>
+                <th>Postre</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="menusBody"></tbody>
+    </table>
+
+    <script>
+        async function enviarDatos(method, url, data) {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        }
+
+        async function agregarEditarMenu(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Verificar si el menú ya existe
+            const response = await fetch(`/api/menus?numeroMenu=${data.numeroMenu}`);
+            const existingMenu = await response.json();
+
+            let menuExistente = false;
+
+            existingMenu.results.forEach(menu => {
+                if (menu.numeroMenu === data.numeroMenu) {
+                    // Menú existe, enviar solicitud PUT para actualizarlo
+                    menuExistente = true;
+                }
+            });
+            if (menuExistente) {
+                const response = await enviarDatos('PUT', '/api/editarMenu', data);
+                console.log(response);
+            } else {
+                // Menú no existe, enviar solicitud POST para crearlo
+                const response = await enviarDatos('POST', '/api/nuevoMenu', data);
+                console.log(response);
+            }
+
+            // Actualizar la lista de menús
+            await cargarMenus();
+        }
+
+        document.getElementById('formularioMenu').addEventListener('submit', agregarEditarMenu);
+
+        async function cargarMenus() {
+            const response = await fetch('/api/menus');
+            const menus = await response.json();
+
+            const menusBody = document.getElementById('menusBody');
+            menusBody.innerHTML = '';
+
+            menus.results.forEach(menu => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${menu.numeroMenu}</td>
+                <td>${menu.primerPlato}</td>
+                <td>${menu.segundoPlato}</td>
+                <td>${menu.postre}</td>
+                <td>${menu.precio}</td>
+                <td><button onclick="borrarMenu('${menu.numeroMenu}')">Eliminar</button></td>
+            `;
+                menusBody.appendChild(row);
+            });
+        }
+
+        async function borrarMenu(numeroMenu) {
+            if (confirm(`¿Seguro que quieres borrar el menú ${numeroMenu}?`)) {
+                const response = await enviarDatos('DELETE', '/api/borrarMenu', { numeroMenu });
+                console.log(response);
+
+                // Actualizar la lista de menús después de eliminar uno
+                await cargarMenus();
+            }
+        }
+
+        // Cargar los menús al cargar la página
+        cargarMenus();
+    </script>
+
+</body>
+
+</html>
+
+
+
+
+
+<!-- 
+    PRUEBASSSSSSS :S
+    <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operaciones CRUD de Menú</title>
+</head>
+
+<body>
+    <h1>Operaciones CRUD de Menú</h1>
+
+    <h2>Añadir/Editar Menú</h2>
+    <form id="formularioMenu">
+        <label for="numeroMenu">Número de Menú:</label>
+        <input type="text" id="numeroMenu" name="numeroMenu"><br><br>
+        <label for="primerPlato">Primer Plato:</label>
+        <input type="text" id="primerPlato" name="primerPlato"><br><br>
+        <label for="segundoPlato">Segundo Plato:</label>
+        <input type="text" id="segundoPlato" name="segundoPlato"><br><br>
+        <label for="postre">Postre:</label>
+        <input type="text" id="postre" name="postre"><br><br>
+        <label for="precio">Precio:</label>
+        <input type="text" id="precio" name="precio"><br><br>
+        <button type="submit">Añadir/Editar Menú</button>
+    </form>
+
+    <h2>Menús</h2>
+    <div id="menus"></div>
+
+    <script>
+        async function enviarDatos(method, url, data) {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        }
+
+        async function agregarEditarMenu(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Verificar si el menú ya existe
+            const response = await fetch(`/api/menus?numeroMenu=${data.numeroMenu}`);
+            const existingMenu = await response.json();
+
+            let menuExistente = false;
+
+            existingMenu.results.forEach(menu => {
+                if (menu.numeroMenu === data.numeroMenu) {
+                    // Menú existe, enviar solicitud PUT para actualizarlo
+                    menuExistente = true;
+                }
+            });
+            if (menuExistente) {
+                const response = await enviarDatos('PUT', '/api/editarMenu', data);
+                console.log(response);
+            } else {
+                // Menú no existe, enviar solicitud POST para crearlo
+                const response = await enviarDatos('POST', '/api/nuevoMenu', data);
+                console.log(response);
+            }
+
+            // Actualizar la lista de menús
+            await cargarMenus();
+        }
+
+        document.getElementById('formularioMenu').addEventListener('submit', agregarEditarMenu);
+
+
+        async function cargarMenus() {
+            const response = await fetch('/api/menus');
+            const menus = await response.json();
+
+            const menusDiv = document.getElementById('menus');
+            menusDiv.innerHTML = '';
+
+            menus.results.forEach(menu => {
+                const menuDiv = document.createElement('div');
+                menuDiv.innerHTML = `
+                     <p><strong>Número de Menú:</strong> ${menu.numeroMenu}</p>
+                     <p><strong>Primer Plato:</strong> ${menu.primerPlato}</p>
+                     <p><strong>Segundo Plato:</strong> ${menu.segundoPlato}</p>
+                     <p><strong>Postre:</strong> ${menu.postre}</p>
+                     <p><strong>Precio:</strong> ${menu.precio}</p>
+                     <button onclick="borrarMenu('${menu.numeroMenu}')">Eliminar</button>
+                     <hr>
+                 `;
+                menusDiv.appendChild(menuDiv);
+            });
+        }
+
+        async function borrarMenu(numeroMenu) {
+            if (confirm(`¿Seguro que quieres borrar el menú ${numeroMenu}?`)) {
+                const response = await enviarDatos('DELETE', '/api/borrarMenu', { numeroMenu });
+                console.log(response);
+
+                // Actualizar la lista de menús después de eliminar uno
+                await cargarMenus();
+            }
+        }
+
+        // Cargar los menús al cargar la página
+        cargarMenus();
+    </script>
+</body>
+
+</html> -->
