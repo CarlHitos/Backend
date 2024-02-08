@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mongodonald's</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        button,
+        select {
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="menu">
+        <button id="menuButton">Pedir Menú</button>
+    </div>
+    <div id="hamburguesas">
+        <button id="hamburguesaButton">Pedir Hamburguesa</button>
+    </div>
+    <div id="bebidas">
+        <button id="bebidaButton">Pedir Bebida</button>
+    </div>
+    <div id="finalizar">
+        <button id="finalizarButton">Finalizar Pedido</button>
+    </div>
+
+    <select id="productosSelect"></select>
+    <button id="enviarPedidoButton">Enviar Pedido</button>
+
+    <script>
+
+        document.getElementById('menuButton').addEventListener('click', () => {
+            fetch('/menu')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('productosSelect');
+                    select.innerHTML = '';
+                    data.forEach(menu => {
+                        const option = document.createElement('option');
+                        option.value = menu.nombre;
+                        option.textContent = menu.nombre + ' - $' + menu.precio;
+                        select.appendChild(option);
+                    });
+                });
+        });
+
+
+        document.getElementById('hamburguesaButton').addEventListener('click', () => {
+            fetch('/hamburguesas')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('productosSelect');
+                    select.innerHTML = '';
+                    data.forEach(hamburguesa => {
+                        const option = document.createElement('option');
+                        option.value = hamburguesa.nombre;
+                        option.textContent = hamburguesa.nombre + ' - $' + hamburguesa.precio;
+                        select.appendChild(option);
+                    });
+                });
+        });
+
+        document.getElementById('bebidaButton').addEventListener('click', () => {
+            fetch('/bebidas')
+                .then(response => response.json())
+                .then(data => {
+                    // Mostrar opciones de bebidas en el select
+                    const select = document.getElementById('productosSelect');
+                    select.innerHTML = '';
+                    data.forEach(bebida => {
+                        const option = document.createElement('option');
+                        option.value = bebida.nombre;
+                        option.textContent = bebida.nombre + ' - $' + bebida.precio;
+                        select.appendChild(option);
+                    });
+                });
+        });
+
+        document.getElementById('enviarPedidoButton').addEventListener('click', () => {
+            const selectedProduct = document.getElementById('productosSelect').value;
+            const pedido = { producto: selectedProduct };
+
+            fetch('/pedido', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(pedido)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Pedido enviado correctamente');
+                    } else {
+                        alert('Error al enviar el pedido');
+                    }
+                });
+        });
+
+
+    </script>
+</body>
+
+</html>
